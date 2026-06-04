@@ -1,0 +1,32 @@
+---
+- name: Gather host facts
+  hosts: all
+  gather_facts: true
+  ignore_unreachable: true
+
+  tasks:
+
+    - name: Mark reachable hosts
+      set_fact:
+        reachable: "YES"
+
+- name: Generate report
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    report_file: /var/tmp/inventory_reports/inventory_assessment.csv
+
+  tasks:
+
+    - name: Create report
+      copy:
+        dest: "{{ report_file }}"
+        content: |
+          Inventory_Host,Reachable,Hostname,FQDN,IP,UUID,Machine_ID
+          {% for host in groups['all'] %}
+          {{ host }},{{ hostvars[host].reachable | default('NO') }},{{ hostvars[host].ansible_hostname | default('UNREACHABLE') }},{{ hostvars[host].ansible_fqdn | default('UNREACHABLE') }},{{ hostvars[host].ansible_default_ipv4.address | default('UNREACHABLE') }},{{ hostvars[host].ansible_product_uuid | default('UNREACHABLE') }},{{ hostvars[host].ansible_machine_id | default('UNREACHABLE') }}
+          {% endfor %}
+
+    - debug:
+        msg: "Report written to {{ report_file }}"
