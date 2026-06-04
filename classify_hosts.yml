@@ -7,7 +7,7 @@
 
     - name: Create report
       copy:
-        dest: /tmp/inventory_assessment.csv
+        dest: /home/aapadmin/inventory_assessment.csv
         content: |
           Host,Classification
           aap,Canonical
