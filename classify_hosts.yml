@@ -1,22 +1,19 @@
 ---
-- name: Generate Inventory Assessment CSV
-  hosts: controller
-  gather_facts: false
-
-  vars:
-    report_file: /tmp/inventory_assessment.csv
+- name: Inventory Assessment
+  hosts: all
+  gather_facts: true
+  ignore_unreachable: true
 
   tasks:
 
-    - name: Create CSV report
-      copy:
-        dest: "{{ report_file }}"
-        content: |
-          Inventory Host,Reachable,Hostname,FQDN,IP,UUID,Machine_ID
-          {% for host in groups['all'] %}
-          {{ host }},{{ 'YES' if hostvars[host].ansible_hostname is defined else 'NO' }},{{ hostvars[host].ansible_hostname | default('UNREACHABLE') }},{{ hostvars[host].ansible_fqdn | default('UNREACHABLE') }},{{ hostvars[host].ansible_default_ipv4.address | default('UNREACHABLE') }},{{ hostvars[host].ansible_product_uuid | default('UNREACHABLE') }},{{ hostvars[host].ansible_machine_id | default('UNREACHABLE') }}
-          {% endfor %}
-
-    - name: Show report location
+    - name: Classification
       debug:
-        msg: "Report created at {{ report_file }}"
+        msg:
+          host: "{{ inventory_hostname }}"
+          classification: >-
+            {% if ansible_machine_id is not defined %}
+            Invalid / Unreachable
+            {% else %}
+            Reachable
+            {% endif %}
+          machine_id: "{{ ansible_machine_id | default('NA') }}"
