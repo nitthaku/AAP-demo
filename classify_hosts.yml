@@ -1,19 +1,22 @@
 ---
-- name: Inventory Classification Report
-  hosts: localhost
+- name: Generate Inventory Assessment CSV
+  hosts: controller
   gather_facts: false
+
+  vars:
+    report_file: /tmp/inventory_assessment.csv
 
   tasks:
 
-    - name: Create report
+    - name: Create CSV report
       copy:
-        dest: /home/aapadmin/inventory_assessment.csv
+        dest: "{{ report_file }}"
         content: |
-          Host,Classification
-          aap,Canonical
-          aap.example.com,Duplicate
-          192.168.142.128,Duplicate
-          linux-aap,Duplicate
-          oldserver01,Decommission Candidate
-          wronghost01,Invalid DNS
-          badip01,Invalid IP
+          Inventory Host,Reachable,Hostname,FQDN,IP,UUID,Machine_ID
+          {% for host in groups['all'] %}
+          {{ host }},{{ 'YES' if hostvars[host].ansible_hostname is defined else 'NO' }},{{ hostvars[host].ansible_hostname | default('UNREACHABLE') }},{{ hostvars[host].ansible_fqdn | default('UNREACHABLE') }},{{ hostvars[host].ansible_default_ipv4.address | default('UNREACHABLE') }},{{ hostvars[host].ansible_product_uuid | default('UNREACHABLE') }},{{ hostvars[host].ansible_machine_id | default('UNREACHABLE') }}
+          {% endfor %}
+
+    - name: Show report location
+      debug:
+        msg: "Report created at {{ report_file }}"
