@@ -1,0 +1,9 @@
+---
+- name: Connectivity Assessment
+  hosts: all
+  gather_facts: false
+
+  tasks:
+
+    - name: Verify connectivity
+      ansible.builtin.ping:

@@ -1,0 +1,16 @@
+---
+- name: Host Discovery
+  hosts: all
+  gather_facts: true
+
+  tasks:
+
+    - name: Display host identity
+      debug:
+        msg:
+          inventory_hostname: "{{ inventory_hostname }}"
+          hostname: "{{ ansible_hostname | default('NA') }}"
+          fqdn: "{{ ansible_fqdn | default('NA') }}"
+          ip: "{{ ansible_default_ipv4.address | default('NA') }}"
+          machine_id: "{{ ansible_machine_id | default('NA') }}"
+          uuid: "{{ ansible_product_uuid | default('NA') }}"
