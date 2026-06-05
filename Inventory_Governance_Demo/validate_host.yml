@@ -1,0 +1,46 @@
+---
+- name: Validate host onboarding request
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    inventory_id: 3   # Replace with your inventory ID
+
+  tasks:
+
+    - name: Validate hostname is FQDN
+      ansible.builtin.fail:
+        msg: "Hostname must be FQDN (example: server01.example.com)"
+      when: hostname is not match('^([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$')
+
+    - name: Get inventory hosts
+      ansible.builtin.uri:
+        url: "https://192.168.142.128/execution/infrastructure/inventories/inventory/3/hosts/"
+        method: GET
+        user: "admin"
+        password: "admin1234"
+        force_basic_auth: true
+        validate_certs: false
+      register: inventory_hosts
+
+    - name: Check duplicate inventory_hostname
+      ansible.builtin.fail:
+        msg: "inventory_hostname '{{ hostname }}' already exists"
+      when: item.name == hostname
+      loop: "{{ inventory_hosts.json.results }}"
+
+    - name: Check duplicate ansible_host
+      ansible.builtin.fail:
+        msg: "IP '{{ ip_address }}' already exists"
+      when:
+        - item.variables is defined
+        - "'ansible_host' in item.variables"
+        - (item.variables | from_yaml).ansible_host == ip_address
+      loop: "{{ inventory_hosts.json.results }}"
+
+    - name: Validation successful
+      ansible.builtin.debug:
+        msg:
+          - "Hostname validation passed"
+          - "No duplicate hostname found"
+          - "No duplicate IP found"

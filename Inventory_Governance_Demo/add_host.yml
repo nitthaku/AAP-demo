@@ -1,0 +1,31 @@
+---
+- name: Add host to inventory
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+
+    - name: Add host to Guardrail_Demo inventory
+      awx.awx.host:
+        controller_host: "https://192.168.142.128"
+        controller_username: "admin"
+        controller_password: "admin1234"
+        validate_certs: false
+
+        inventory: "Guardrail_Demo"
+
+        name: "{{ hostname }}"
+
+        variables:
+          ansible_host: "{{ ip_address }}"
+
+        state: present
+
+      register: host_result
+
+    - name: Show onboarding result
+      ansible.builtin.debug:
+        msg:
+          - "Host onboarding completed"
+          - "Hostname: {{ hostname }}"
+          - "IP Address: {{ ip_address }}"
