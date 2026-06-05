@@ -5,27 +5,23 @@
 
   tasks:
 
-    - name: Add host to Guardrail_Demo inventory
-      awx.awx.host:
-        controller_host: "https://192.168.142.128"
-        controller_username: "admin"
-        controller_password: "admin1234"
+    - name: Create host in main inventory
+      ansible.builtin.uri:
+        url: "https://192.168.142.128/api/controller/v2/hosts/"
+        method: POST
+        user: "admin"
+        password: "admin1234"
+        force_basic_auth: true
         validate_certs: false
-
-        inventory: "Guardrail_Demo"
-
-        name: "{{ hostname }}"
-
-        variables:
-          ansible_host: "{{ ip_address }}"
-
-        state: present
-
+        body_format: json
+        body:
+          name: "{{ hostname }}"
+          inventory: 3
+          variables: "ansible_host: {{ ip_address }}"
+        status_code:
+          - 201
       register: host_result
 
-    - name: Show onboarding result
+    - name: Show API response
       ansible.builtin.debug:
-        msg:
-          - "Host onboarding completed"
-          - "Hostname: {{ hostname }}"
-          - "IP Address: {{ ip_address }}"
+        var: host_result.json
