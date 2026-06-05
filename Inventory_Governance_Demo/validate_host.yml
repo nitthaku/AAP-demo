@@ -15,7 +15,7 @@
 
     - name: Get inventory hosts
       ansible.builtin.uri:
-        url: "https://192.168.142.128/execution/infrastructure/inventories/inventory/3/hosts/"
+        url: "https://192.168.142.128/api/controller/v2/inventories/3/hosts/"
         method: GET
         user: "admin"
         password: "admin1234"
