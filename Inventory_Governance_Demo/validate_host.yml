@@ -22,6 +22,7 @@
         force_basic_auth: true
         validate_certs: false
       register: inventory_hosts
+
     - name: Debug API response
       ansible.builtin.debug:
         msg:
